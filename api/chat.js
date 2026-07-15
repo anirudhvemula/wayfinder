@@ -56,10 +56,19 @@ export default async function handler(req, res) {
     });
 
     if (!geminiResponse.ok) {
-      const errText = await geminiResponse.text();
-      console.error('Gemini API error:', geminiResponse.status, errText);
-      return res.status(502).json({ error: 'Upstream model error' });
-    }
+	  const errText = await geminiResponse.text();
+
+	  console.error(
+		'Gemini API error:',
+		geminiResponse.status,
+		errText
+	  );
+
+	  return res.status(502).json({
+		status: geminiResponse.status,
+		error: errText
+	  });
+	}
 
     const data = await geminiResponse.json();
     const text =
