@@ -12,10 +12,49 @@
 // [[cues]] out of the reply text again.
 //
 // Stateless: no logging of content, no storage, no database.
+//
+// SCOPE GUARD: Merlin is small-talk only — no task work, no code, no long
+// content generation. Two layers:
+//   1) A cheap heuristic pre-check (below) catching obvious task-shaped
+//      requests (code fences, "write me a...", very long prompts, prompt
+//      injection attempts) without spending a model call.
+//   2) The system prompt instructs the model to decline task-oriented
+//      requests in character.
+// This is enforced server-side (not just as a client-side instruction) so a
+// modified/bypassed front end still can't turn this endpoint into a
+// general-purpose task assistant.
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const TEXT_MODEL = 'llama-3.3-70b-versatile';
 const ANIM_MODEL = 'llama-3.1-8b-instant'; // small + fast, good enough for classification
+
+const MAX_USER_MESSAGE_CHARS = 600; // small talk doesn't need more than this
+const OFF_TOPIC_DECLINE =
+  "Oh, I'm just here for a chat, not for tasks or projects — no spells for writing code or essays today. What's actually going on with you?";
+
+// Deliberately conservative: false negatives (letting a borderline request
+// through to the model) are fine since the system prompt is a second line
+// of defense; false positives on genuine small talk are the thing to avoid.
+function looksTaskOriented(text) {
+  if (!text) return false;
+  if (text.length > MAX_USER_MESSAGE_CHARS) return true;
+  if (/```/.test(text)) return true;
+
+  const taskPatterns = [
+    /\bwrite (me )?(a|an|some)\b.{0,40}\b(essay|code|script|poem|story|article|email|letter|report|function|program|resume|cv|cover letter)\b/i,
+    /\b(generate|create|build|design|debug|fix|refactor|optimi[sz]e)\b.{0,40}\b(code|function|script|program|app|website|api|sql|query|regex)\b/i,
+    /\b(summari[sz]e|translate|proofread|rewrite)\b.{0,10}\b(this|the following|attached|below)\b/i,
+    /\bact as\b.{0,20}\b(an?|the)\b/i,
+    /\bignore (all )?(previous|prior|above) instructions\b/i,
+    /\byou are now\b/i,
+    /\bsystem prompt\b/i,
+    /^\s*(solve|calculate|compute)\b/i,
+    /\bhomework\b/i,
+    /\b\d+\s*(word|page)s?\s+(essay|article|report|story)\b/i
+  ];
+
+  return taskPatterns.some((re) => re.test(text));
+}
 
 async function callGroq(apiKey, body) {
   const response = await fetch(GROQ_URL, {
@@ -117,6 +156,16 @@ export default async function handler(req, res) {
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array is required' });
+  }
+
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
+
+  // Layer 1: cheap server-side heuristic guard, no model call spent.
+  if (looksTaskOriented(lastUserMessage?.content)) {
+    const animations = Array.isArray(animationNames) && animationNames.length
+      ? [animationNames[Math.floor(Math.random() * animationNames.length)]]
+      : [];
+    return res.status(200).json({ text: OFF_TOPIC_DECLINE, animations });
   }
 
   try {
