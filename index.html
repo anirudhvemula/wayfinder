@@ -748,7 +748,19 @@ function showWelcomeNote() {
   pendingWelcomeSpeech = fullGreeting;
 }
 
+const bgMusic = document.getElementById('bg-music');
+bgMusic.volume = 0.5;
+
+function startBgMusic() {
+  bgMusic.play().catch(() => { /* will retry on next user gesture */ });
+}
+
+// Try right away — some browsers allow it, others will block until a
+// user gesture occurs (handled by playPendingWelcomeSpeech below).
+startBgMusic();
+
 function playPendingWelcomeSpeech() {
+  startBgMusic();
   if (userHasInteracted) return;
   userHasInteracted = true;
   if (pendingWelcomeSpeech) {
@@ -976,5 +988,6 @@ promptInput.addEventListener('input', dismissWelcomeNote, { once: true });
 promptInput.focus();
 </script>
 
+<audio id="bg-music" src="BgMusic.mp3" loop preload="auto"></audio>
 </body>
 </html>
