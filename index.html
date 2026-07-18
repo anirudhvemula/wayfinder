@@ -482,7 +482,6 @@
     width: 90px;
     height: 3px;
     border-radius: 2px;
-    background: rgba(239, 230, 211, 0.15);
     outline: none;
     cursor: pointer;
   }
@@ -613,7 +612,7 @@
     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
     <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
   </svg>
-  <input type="range" id="music-volume" min="0" max="100" value="20" aria-label="Background music volume">
+  <input type="range" id="music-volume" min="0" max="100" value="10" aria-label="Background music volume">
 </div>
 <div class="welcome-note" id="welcome-note">
   <div class="welcome-title">At last... the one foretold arrives.</div>
@@ -841,11 +840,21 @@ function showWelcomeNote() {
 
 const bgMusic = document.getElementById('bg-music');
 const musicVolumeSlider = document.getElementById('music-volume');
+
+function updateVolumeTrackFill() {
+  if (!musicVolumeSlider) return;
+  const pct = Number(musicVolumeSlider.value);
+  musicVolumeSlider.style.background =
+    `linear-gradient(to right, var(--amber) 0%, var(--amber) ${pct}%, rgba(239, 230, 211, 0.15) ${pct}%, rgba(239, 230, 211, 0.15) 100%)`;
+}
+
 bgMusic.volume = (musicVolumeSlider ? Number(musicVolumeSlider.value) : 50) / 100;
+updateVolumeTrackFill();
 
 if (musicVolumeSlider) {
   musicVolumeSlider.addEventListener('input', () => {
     bgMusic.volume = Number(musicVolumeSlider.value) / 100;
+    updateVolumeTrackFill();
   });
 }
 
