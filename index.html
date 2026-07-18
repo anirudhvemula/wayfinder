@@ -457,6 +457,62 @@
     pointer-events: none;
   }
 
+  /* ---------- Background music volume control ---------- */
+  .music-control {
+    position: fixed;
+    top: 28px;
+    right: 32px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+  }
+
+  .music-control svg {
+    width: 16px;
+    height: 16px;
+    color: var(--ash);
+    flex-shrink: 0;
+  }
+
+  #music-volume {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 90px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(239, 230, 211, 0.15);
+    outline: none;
+    cursor: pointer;
+  }
+
+  #music-volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(201,149,76,0.5);
+  }
+
+  #music-volume::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(201,149,76,0.5);
+  }
+
+  @media (max-width: 640px) {
+    .music-control { top: 16px; right: 16px; }
+    #music-volume { width: 64px; }
+  }
+
   /* Welcome message: appears once Merlin has loaded, holds briefly, then
      fades itself out. Sits centered above the input dock so it reads as
      part of the same scene rather than a separate UI element — same
@@ -551,6 +607,14 @@
 <!--
 <div class="top-note">A conversational companion for fun — not therapy, counseling, or medical advice.</div>
 -->
+<div class="music-control">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+  </svg>
+  <input type="range" id="music-volume" min="0" max="100" value="20" aria-label="Background music volume">
+</div>
 <div class="welcome-note" id="welcome-note">
   <div class="welcome-title">At last... the one foretold arrives.</div>
   <div class="welcome-body">Merlin the Wizard awaits your tale... Begin typing below.</div>
@@ -776,7 +840,14 @@ function showWelcomeNote() {
 }
 
 const bgMusic = document.getElementById('bg-music');
-bgMusic.volume = 0.5;
+const musicVolumeSlider = document.getElementById('music-volume');
+bgMusic.volume = (musicVolumeSlider ? Number(musicVolumeSlider.value) : 50) / 100;
+
+if (musicVolumeSlider) {
+  musicVolumeSlider.addEventListener('input', () => {
+    bgMusic.volume = Number(musicVolumeSlider.value) / 100;
+  });
+}
 
 function startBgMusic() {
   bgMusic.play().catch(() => { /* will retry on next user gesture */ });
