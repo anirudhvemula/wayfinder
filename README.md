@@ -1,12 +1,21 @@
-# Wayfinder - https://anirudhvemula.github.io/wayfinder/
+# 🧙✨🪄🔮 Wayfinder 🔮🪄✨🧙
+https://anirudhvemula.github.io/wayfinder/
+<br><br><br>
+
+https://github.com/user-attachments/assets/ba6e7846-6a37-4c54-83a2-5d3bf1ca8f60
+
+
 
 A minimal, memory-free conversational companion, with Merlin (via Clippy.js) as an
 animated on-screen character. Front end on GitHub Pages, a one-file serverless proxy on
 Vercel keeps your Gemini API key hidden.
 
-> **Status:** v1 (2D Clippy-based) is live and working. A full 3D/VR reimagining is in
-> concept phase — see [Roadmap: Merlin in VR](#roadmap-merlin-in-vr) below.
+-> **Status:** v1 (2D Clippy-based) is live and working. A full 3D/VR reimagining is in
+concept phase — see [Roadmap: Merlin in VR](#roadmap-merlin-in-vr) below.
+<br><br><br><br>
+<img width="1536" height="1024" alt="Merlins Chamber Concept VR" src="https://github.com/user-attachments/assets/60d8caa8-b1d5-4430-afa2-ea169a2d7ee8" />
 
+<br><br>
 ## What's inside
 - **Chat**: powered by Gemini 2.5 Flash, called through your own Vercel proxy so the key
   never reaches the browser.
